@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Influencer Chat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Background Layer -->
+        <div class="background-layer"></div>
+
+        <!-- Info Badge -->
+        <div class="info-badge">
+            <span class="influencer-name">MrBeast</span>
+            <span class="ai-badge">AI</span>
+        </div>
+
+        <!-- Disclosure -->
+        <div class="disclosure">Powered by AI — responses are generated, not from MrBeast directly</div>
+
+        <!-- Centered Character Layer -->
+        <div class="character-layer">
+            <div class="character">
+                <img id="character-image" src="/assets/avatar.jpg" alt="MrBeast">
+                <video id="character-video" autoplay playsinline hidden></video>
+                <div id="recording-overlay" hidden>
+                    <div class="pulse"></div>
+                    <span>Generating...</span>
+                </div>
+            </div>
+            <!-- Response text overlay -->
+            <div id="response-text" class="response-text" hidden></div>
+        </div>
+
+        <!-- Bottom Input Bar Layer -->
+        <div class="input-bar-layer">
+            <div class="input-bar">
+                <input type="text" id="user-input" placeholder="Say something..." autocomplete="off">
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

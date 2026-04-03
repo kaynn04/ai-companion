@@ -1,0 +1,36 @@
+.input-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 3;
+}
+
+.input-field {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+.send-button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.send-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.send-button:hover:not(:disabled) {
+    background-color: #0056b3;
+}

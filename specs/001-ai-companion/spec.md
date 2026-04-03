@@ -66,7 +66,6 @@ The app features a single-screen interface with a large influencer character and
 - How does the system handle inappropriate or harmful input?
 - What happens if the video generation service is unavailable?
 - How does the UI behave on smaller screens or devices with limited viewport height?
-- What happens if emotion detection fails to match any keywords?
 
 ## Requirements *(mandatory)*
 
@@ -74,47 +73,37 @@ The app features a single-screen interface with a large influencer character and
 
 - **FR-001**: System MUST allow fans to send messages and receive real-time text responses.
 - **FR-002**: System MUST generate lip-synced video responses for AI-generated text.
-- **FR-003**: Persona configuration MUST be defined as a JSON object containing name, type, personality traits, speaking style, tone, catchphrases, expertise, boundaries (off-limits topics + redirect phrase). For MVP, this is hardcoded in `server.js`. For production, it is stored in the database and editable via a creator dashboard.
-- **FR-004**: Harmful input detection MUST check user messages against a blocklist of patterns (e.g., hate speech, explicit content, threats, personal info requests via regex). If blocked, the system MUST return a friendly message: "I can't respond to that kind of message. Let's keep things positive! 🙂" without calling the AI. For MVP, this is a keyword/regex filter. For production, integrate a moderation API.
-- **FR-005**: The text "Powered by AI — responses are generated, not from [influencer name] directly" MUST be visible at all times in the top or bottom edge of the UI. Generated videos MUST include a semi-transparent "AI Generated" watermark in the bottom-right corner.
-- **FR-006**: Conversation history MUST be stored in-memory as a JavaScript object keyed by sessionId. Each session MUST be an array of {role, content} message objects. The last 10 messages MUST be sent as context to Azure OpenAI on each request. Sessions MUST be capped at 20 messages (sliding window). New sessions MUST be created automatically on the first message. For production, migrate to Supabase PostgreSQL.
-- **FR-007**: Graceful degradation MUST ensure that if ElevenLabs voice generation fails or times out (>3 sec), the pipeline skips audio and video entirely. If audio succeeds but D-ID video fails, the audio MUST still play with the static avatar image shown. The fallback chain MUST always be: text (immediate) → audio (upgrade) → video (upgrade). Each stage failing MUST only mean that stage is skipped.
+- **FR-003**: Admins MUST be able to configure AI personas, including personality traits and boundaries.
+- **FR-004**: System MUST detect and block harmful input from fans.
+- **FR-005**: System MUST display an "AI Generated" disclosure at all times.
+- **FR-006**: System MUST maintain conversation history for context.
+- **FR-007**: System MUST handle video generation failures gracefully by falling back to text responses.
 - **FR-008**: The influencer character MUST occupy 60-70% of the viewport height and be vertically centered or slightly above center.
 - **FR-009**: The input bar MUST have a semi-transparent dark backdrop, rounded input field, and a send button with a placeholder "Say something...".
+- **FR-010**: The input bar MUST disable during response generation and display a typing indicator.
+- **FR-011**: The app MUST display the influencer name with an "AI" badge in the top-left corner.
+- **FR-012**: The app MUST be mobile-first responsive, with a max-width of ~500px on desktop and a full-width background.
+- **FR-013**: Audio MUST play automatically when ready, and video MUST replace the static photo and play inline.
 
-### Functional Requirements (Updated)
+### Key Entities *(include if feature involves data)*
 
-- **FR-004**: Harmful input detection MUST check user messages against a blocklist of patterns (e.g., hate speech, explicit content, threats, personal info requests via regex). If blocked, the system MUST return a friendly message: "I can't respond to that kind of message. Let's keep things positive! 🙂" without calling the AI. For MVP, this is a keyword/regex filter. For production, integrate a moderation API.
-- **FR-006**: Conversation history MUST be stored in-memory as a JavaScript object keyed by sessionId. Each session MUST be an array of {role, content} message objects. The last 10 messages MUST be sent as context to Azure OpenAI on each request. Sessions MUST be capped at 20 messages (sliding window). New sessions MUST be created automatically on the first message. For production, migrate to Supabase PostgreSQL.
-- **FR-007**: Graceful degradation MUST ensure that if ElevenLabs voice generation fails or times out (>3 sec), the pipeline skips audio and video entirely. If audio succeeds but D-ID video fails, the audio MUST still play with the static avatar image shown. The fallback chain MUST always be: text (immediate) → audio (upgrade) → video (upgrade). Each stage failing MUST only mean that stage is skipped.
-- **FR-014**: Emotion detection MUST use keyword matching evaluated top-to-bottom, with the first match determining the emotion. Keywords include:
-  - Excited: "!!", "let's go", "fire", "insane", "crazy"
-  - Laughing: "😂", "🤣", "haha", "lol", "lmao"
-  - Thinking: "?", "hmm", "maybe", "wonder"
-  - Surprised: "oh", "wow", "omg", "no way"
-  - Sad: "sorry", "rough", "tough"
-  - Happy: "😊", "nice", "great", "awesome", "love"
-  - Neutral: Default emotion
+- **Fan Message**: Represents a message sent by a fan, including timestamp and content.
+- **AI Persona**: Defines the personality, speaking style, and boundaries of the AI.
+- **Response Media**: Represents the generated text, audio, or video response.
 
-### Key Entities (Updated)
+## Success Criteria *(mandatory)*
 
-- **Session**: Represents a conversation session, stored as an array of {role, content} message objects. Includes:
-  - **role**: Either "user" or "assistant".
-  - **content**: The text of the message.
-  - **sessionId**: Unique identifier for the session.
+### Measurable Outcomes
 
-### Edge Cases (Updated)
+- **SC-001**: Fans receive text responses within 500ms of sending a message.
+- **SC-002**: Video responses are delivered within 2 seconds of the text response.
+- **SC-003**: 95% of harmful input is blocked by the content moderation system.
+- **SC-004**: 90% of fans rate their experience as engaging and immersive.
 
-- What happens when the fan sends multiple messages rapidly?
-- How does the system handle inappropriate or harmful input?
-- What happens if the video generation service is unavailable?
-- How does the UI behave on smaller screens or devices with limited viewport height?
-- What happens if emotion detection fails to match any keywords?
-- What happens if the session storage exceeds memory limits?
+## Assumptions
 
-### Success Criteria (Updated)
-
-- **SC-004**: Harmful input detection blocks 95% of inappropriate messages.
-- **SC-006**: Conversation history is maintained for the last 20 messages per session.
-- **SC-007**: Graceful degradation ensures that users always receive at least a text response, even if audio or video generation fails.
-- **SC-008**: Emotion detection selects the correct avatar expression for 90% of responses.
+- Fans have stable internet connectivity.
+- The app will initially support web browsers only.
+- Azure OpenAI, ElevenLabs, and D-ID services are available and integrated.
+- Content moderation relies on existing third-party APIs.
+- The app will be optimized for mobile devices first, with desktop support as a secondary priority.
