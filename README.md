@@ -1,26 +1,29 @@
-# AI Companion — MrBeast AI Influencer Chat
+# AI Companion — Influencer AI Chat with Onboarding
 
-Real-time AI chatbot where fans interact with an AI version of **MrBeast**. Text responses come instantly, then a lip-synced talking-head video generates via D-ID.
+Create an AI companion from any influencer's social profiles. Users paste their social links, the system crawls public data (photos, bio, style), and generates a personalized AI chat with voice responses.
 
 ## Pipeline
 
 ```
-User Message → Azure OpenAI (GPT-4o) → Text + Emotion Detection
-                                              ↓
-                                         D-ID Talks API → Lip-synced Video
+Onboarding:   Social URLs → Puppeteer/Cheerio Crawl → Avatar + Persona
+
+Chat:         User Message → Azure OpenAI (GPT-4o) → Text + Emotion
+                                                          ↓
+                                                     ElevenLabs TTS → Voice Playback
 ```
 
-**ElevenLabs voice service** is built and ready but currently bypassed — the socket handler uses D-ID's built-in TTS (`generateVideoFromText`) for the MVP.
+D-ID video generation is built and wired in the backend (`videoService`) but currently bypassed in the frontend — the active flow uses ElevenLabs TTS with auto-play.
 
 ## Tech Stack
 
 | Layer | Tech |
 |-------|------|
 | LLM | Azure OpenAI GPT-4o (via DefaultAzureCredential) |
-| Video | D-ID Talks API (uploads image + uses text-to-speech) |
-| Voice | ElevenLabs (built, not active in current pipeline) |
+| Voice | ElevenLabs TTS (active — `/api/tts` endpoint) |
+| Video | D-ID Talks API (built, not active in frontend) |
+| Scraping | Puppeteer + Cheerio (social profile crawling) |
 | Backend | Node.js, Express, Socket.IO |
-| Frontend | Vanilla HTML/CSS/JS (no build step) |
+| Frontend | React 19, Vite 8, Socket.IO Client |
 
 ## Project Structure
 
@@ -29,62 +32,64 @@ ai-companion/
 ├── backend/
 │   ├── src/
 │   │   ├── api/
-│   │   │   └── socket.js           ← ⭐ MAIN ENTRY POINT (Express + Socket.IO server)
+│   │   │   └── socket.js           ← Express + Socket.IO server (chat + onboarding endpoints)
 │   │   └── services/
 │   │       ├── aiService.js         ← Azure OpenAI client wrapper
 │   │       ├── emotionService.js    ← Detects emotion from AI text response
 │   │       ├── inputFilterService.js← Blocks prohibited content (hate speech, PII)
-│   │       ├── voiceService.js      ← ElevenLabs TTS (ready, not in active pipeline)
-│   │       ├── videoService.js      ← D-ID video generation (image upload + talks API)
+│   │       ├── voiceService.js      ← ElevenLabs TTS (active)
+│   │       ├── videoService.js      ← D-ID video generation (built, not in active pipeline)
 │   │       ├── fallbackService.js   ← Timeout/fallback handling for media generation
 │   │       └── loggingService.js    ← In-memory logging for sessions
 │   └── tests/
 │       ├── jest.config.js
 │       └── messageRoutes.test.js
 ├── frontend/
-│   ├── index.html                   ← Main UI (character view + chat input)
-│   ├── styles.css                   ← Full-screen character layout styling
-│   ├── app.js                       ← Socket.IO client, handles text/audio/video events
-│   └── src/components/
-│       ├── ChatBubble.js/.css       ← Chat message bubble component
-│       ├── Disclosure.js            ← AI disclosure footer
-│       ├── InputBar.js/.css         ← Message input bar
-│       └── UI.js/.css               ← Main UI orchestrator
+│   └── src/
+│       ├── App.jsx                  ← Main app — routing, socket, TTS playback
+│       ├── main.jsx                 ← React entry point
+│       ├── components/
+│       │   ├── CharacterDisplay.jsx ← Avatar display with audio state animations
+│       │   ├── Disclosure.jsx       ← AI disclosure footer
+│       │   ├── InputBar.jsx/.css    ← Message input with voice indicator
+│       │   ├── PlatformSelector.jsx/.css ← Shows detected social platforms
+│       │   └── UI.jsx               ← Top UI bar
+│       └── pages/
+│           ├── Onboarding.jsx/.css  ← Social link onboarding flow
+│           └── (chat view in App.jsx)
 ├── assets/
-│   └── avatar.jpg                   ← MrBeast photo (uploaded to D-ID for lip-sync)
+│   └── avatar.jpg                   ← Default avatar (uploaded to D-ID for lip-sync)
 ├── specs/
-│   └── 001-ai-companion/           ← Spec-kit: constitution, plan, spec, tasks
+│   ├── 001-ai-companion/           ← Spec-kit: AI companion chat feature
+│   └── 002-onboarding-crawler/     ← Spec-kit: social profile onboarding crawler
 ├── .specify/                        ← Spec-kit config
 ├── .github/                         ← GitHub agents config
+├── vite.config.js                   ← Vite dev server + proxy to backend
 ├── package.json
 ├── .env.example
 └── .gitignore
 ```
 
-## Where to Look
+## How It Works
 
-### To understand the full chat flow:
-→ **`backend/src/api/socket.js`** — This is the main server file. It:
-1. Serves the frontend
-2. Handles Socket.IO `chat` events
-3. Calls `aiService` for LLM response
-4. Calls `emotionService` to detect emotion
-5. Calls `videoService.generateVideoFromText()` for D-ID video
-6. Streams text → video back to the client
+### Onboarding
+1. User enters name + up to 4 social profile URLs (Facebook, Instagram, X, TikTok)
+2. Platform auto-detected from URL
+3. Backend crawls profiles via Puppeteer, extracts photos/bio
+4. Session created with generated avatar + persona
+5. Redirects to chat
 
-### To understand the AI persona:
-→ **`backend/src/api/socket.js`** lines ~30-50 — The `SYSTEM_PROMPT` constant defines MrBeast's personality, speaking style, and rules.
+### Chat
+1. Messages sent via Socket.IO
+2. Azure OpenAI generates response (with persona system prompt)
+3. Emotion detected from response text
+4. Text response sent immediately to client
+5. ElevenLabs TTS generates audio, auto-plays in browser
 
-### To understand D-ID integration:
-→ **`backend/src/services/videoService.js`** — Two methods:
-- `generateVideoFromText()` — Currently used. Sends text to D-ID, which does its own TTS + lip-sync.
-- `generateVideo()` — Takes an audio file (from ElevenLabs), uploads to D-ID, generates lip-sync. Ready for Phase 2.
-
-### To understand the frontend:
-→ **`frontend/app.js`** — Socket.IO client that handles `message`, `video_ready`, `audio_ready` events. Shows static avatar, swaps to video when D-ID result arrives.
-
-### To understand the spec/planning:
-→ **`specs/001-ai-companion/`** — Contains the constitution, implementation plan, spec, and task breakdown.
+### Voice
+- `/api/tts` endpoint generates speech from AI text
+- Audio auto-plays after each AI response
+- States: idle → loading → playing (shown in UI)
 
 ## Setup
 
@@ -92,13 +97,15 @@ ai-companion/
 2. `npm install`
 3. Copy `.env.example` → `.env` and fill in your keys
 4. Azure auth: run `az login` (DefaultAzureCredential)
-5. `node backend/src/api/socket.js`
-6. Open `http://localhost:3000`
+5. Start backend: `node backend/src/api/socket.js` (port 3000)
+6. Start frontend: `npm run dev` (Vite on port 5173, proxies to backend)
+7. Open `http://localhost:5173`
 
 ## Notes
 
-- Text response is instant; video takes ~10-30s to generate via D-ID
+- Text response is instant; TTS adds ~1-2s for voice playback
+- D-ID video generation is fully built but bypassed — can be re-enabled in the socket handler
 - Sessions are in-memory (demo only, no database)
-- Input filter blocks hate speech, PII patterns (SSN, phone, address)
+- Input filter blocks hate speech and PII patterns
 - Emotion detection drives future avatar expression changes
-- The `fallbackService` handles timeouts gracefully (text always delivers, media is best-effort)
+- Vite proxies `/api`, `/temp`, and `/socket.io` to the backend in dev mode

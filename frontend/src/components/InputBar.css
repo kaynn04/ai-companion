@@ -1,36 +1,90 @@
 .input-bar {
+    width: 100%;
+    max-width: 500px;
+    padding: 12px 20px 24px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 3;
+    gap: 10px;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .input-field {
     flex: 1;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    margin-right: 10px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    color: #fff;
     font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-field:focus {
+    border-color: rgba(99, 102, 241, 0.6);
+}
+
+.input-field.listening {
+    border-color: rgba(239, 68, 68, 0.6);
+    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+}
+
+.input-field::placeholder {
+    color: rgba(255, 255, 255, 0.3);
 }
 
 .send-button {
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
+    padding: 14px 24px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
     border: none;
-    border-radius: 5px;
+    border-radius: 24px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
     cursor: pointer;
-}
-
-.send-button:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
 }
 
 .send-button:hover:not(:disabled) {
-    background-color: #0056b3;
+    opacity: 0.9;
+}
+
+.send-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.mic-button {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.mic-button:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.mic-button.mic-active {
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.5);
+    animation: mic-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes mic-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); }
+    50% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+}
+
+.status {
+    display: none;
 }

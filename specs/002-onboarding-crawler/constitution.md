@@ -1,12 +1,12 @@
-# AI Companion Constitution
+# AI Companion Constitution (Revised)
 
 ## Core Principles
 
 ### I. Pipeline Architecture (NON-NEGOTIABLE)
 Every fan message flows through a sequential pipeline: AI text → voice synthesis → video generation. This ensures modularity, scalability, and clear responsibility at each stage.
 
-### II. Onboarding Feeds the Pipeline (NEW — v2.0)
-The social profile crawler is the single source of truth for avatar image and persona seed. No hardcoded personas or static images — the onboarding output drives D-ID (image) and the AI system prompt (persona). Manual fallback is allowed only when crawling fails. See: `specs/002-onboarding-crawler/`.
+### II. Onboarding Feeds the Pipeline (NEW)
+The social profile crawler is the single source of truth for avatar image and persona seed. No hardcoded personas or static images — the onboarding output drives D-ID (image) and the AI system prompt (persona). Manual fallback is allowed only when crawling fails.
 
 ### III. Real-Time Responsiveness
 The system prioritizes real-time responsiveness. Text is delivered first, with media upgrades (audio, video) processed asynchronously to maintain user engagement.
@@ -24,7 +24,7 @@ This ensures uninterrupted user experience at every stage.
 All media (text, audio, video) is generated server-side using Azure OpenAI for LLM, ElevenLabs for voice synthesis, and D-ID for video. Media is served via Express static routes for efficiency and reliability.
 
 ### VII. Demo-Grade Storage
-No database. All state is in-memory and session-scoped. Simplicity over durability.
+No database. All state is in-memory and session-scoped. This is a demo, not a production system. Simplicity over durability.
 
 ## Additional Constraints
 
@@ -32,17 +32,21 @@ No database. All state is in-memory and session-scoped. Simplicity over durabili
 - Azure OpenAI for language model processing.
 - ElevenLabs for voice synthesis.
 - D-ID for video generation.
+- Puppeteer for social profile crawling (JS-rendered pages).
+- Cheerio as lightweight fallback for static pages.
 - Express.js for server-side routing and static file serving.
 
 ### Performance Standards
 - Text responses must be delivered within 500ms.
 - Audio and video upgrades must not exceed 2 seconds for processing.
+- Onboarding (submit → crawl → chat redirect) must complete within 15 seconds.
 
 ## Development Workflow
 
 ### Testing and Quality Gates
 - Unit tests for each pipeline stage.
-- Integration tests for end-to-end pipeline validation.
+- Unit tests for crawler (mock HTML responses).
+- Integration tests for end-to-end: onboarding → crawl → chat → response.
 - Load testing to ensure real-time performance under peak conditions.
 
 ### Code Review Process

@@ -1,4 +1,11 @@
 node_modules/
 .env
+.env.*
+!.env.example
 temp/
+dist/
 .vscode/
+*.log
+debug-*.js
+.DS_Store
+Thumbs.db
