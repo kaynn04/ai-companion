@@ -95,11 +95,22 @@ ai-companion/
 
 1. Clone the repo
 2. `npm install`
-3. Copy `.env.example` → `.env` and fill in your keys
-4. Azure auth: run `az login` (DefaultAzureCredential)
-5. Start backend: `node backend/src/api/socket.js` (port 3000)
-6. Start frontend: `npm run dev` (Vite on port 5173, proxies to backend)
-7. Open `http://localhost:5173`
+3. Copy `.env.example` → `.env` and fill in your API keys:
+   - **Azure OpenAI** — endpoint, deployment name, and API key
+   - **ElevenLabs** — API key and voice ID (for TTS)
+   - **D-ID** — API key (optional, video not active)
+   - **GitHub** — token (for onboarding crawler)
+4. Start the backend (Terminal 1):
+   ```
+   npm run dev:backend
+   ```
+5. Start the frontend (Terminal 2):
+   ```
+   npm run dev
+   ```
+6. Open `http://localhost:5173`
+
+> **Note:** If using `DefaultAzureCredential` instead of an API key, run `az login` first and remove `AZURE_OPENAI_API_KEY` from `.env`. The app supports both auth methods.
 
 ## Notes
 

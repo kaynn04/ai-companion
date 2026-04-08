@@ -2,11 +2,11 @@
   "name": "ai-companion",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "backend/src/api/socket.js",
   "scripts": {
-    "start": "node backend/src/index.js",
+    "start": "node backend/src/api/socket.js",
     "dev": "vite",
-    "dev:backend": "node backend/src/index.js",
+    "dev:backend": "node backend/src/api/socket.js",
     "build": "vite build",
     "test": "jest"
   },
